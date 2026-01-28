@@ -286,13 +286,12 @@ export default function ADMReportGenerator() {
             doc.setFont('helvetica', 'bold');
             doc.text(`Mese: ${MESI[meseNum - 1]}`, margin + 2, y + 4);
             doc.text('Giocate', margin + 55, y + 4);
-            doc.text('Giocate emesse in più di 5', margin + 90, y + 4);
+            doc.text('Giocate emesse in più di 5 sec', margin + 90, y + 4);
             doc.text('%', margin + 155, y + 4);
             y += 6;
             
             doc.setFont('helvetica', 'normal');
             doc.rect(margin, y, 165, 5);
-            doc.text('secondi', margin + 105, y + 3.5);
             y += 5;
 
             let totG = 0, tot5 = 0, sumP = 0, countP = 0;
@@ -835,7 +834,7 @@ export default function ADMReportGenerator() {
         </div>
 
         <div className="mt-8 text-center text-gray-500 text-xs">
-          <p>Report ADM Generator v1.6</p>
+          <p>Report ADM Generator v1.7</p>
           <p className="mt-1">Rilevazioni sul Gioco Fisico ai fini del controllo dei Livelli di Servizio</p>
         </div>
       </div>
