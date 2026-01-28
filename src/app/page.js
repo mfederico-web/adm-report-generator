@@ -224,7 +224,7 @@ export default function ADMReportGenerator() {
         const prestazioniPages = [[1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12]];
         
         prestazioniPages.forEach((mesiPage, pageIndex) => {
-          doc.addPage('portrait');
+          doc.addPage('a4', 'p'); // 'p' = portrait
           y = margin;
           
           if (pageIndex === 0) {
@@ -305,7 +305,7 @@ export default function ADMReportGenerator() {
             doc.text(avgP.toFixed(2).replace('.', ','), margin + 148, y + 3.5);
             y += 10;
 
-            if (y > 260) { doc.addPage('portrait'); y = margin; }
+            if (y > 260) { doc.addPage('a4', 'p'); y = margin; }
           });
         });
 
@@ -323,10 +323,11 @@ export default function ADMReportGenerator() {
           const tipoData = parsedData.disponibilita[tipoGioco];
 
           trimestri.forEach((mesiTrimestre) => {
-            // LANDSCAPE per Disponibilità
-            doc.addPage('landscape');
+            // LANDSCAPE: 'l' = landscape
+            doc.addPage('a4', 'l');
             y = 10;
 
+            // Pagina landscape: larghezza 297mm, altezza 210mm
             doc.setFontSize(10);
             doc.setFont('helvetica', 'bold');
             doc.text('2. Disponibilità del sistema di elaborazione e della rete telematica', 10, y);
@@ -348,6 +349,7 @@ export default function ADMReportGenerator() {
             });
             y += 8;
 
+            // Larghezza disponibile in landscape: ~277mm (297 - 20 margini)
             const colWidth = 90;
             const startX = 10;
 
@@ -424,8 +426,8 @@ export default function ADMReportGenerator() {
         // ========================================
         if (parsedData.ripristino) {
           trimestri.forEach((mesiTrimestre) => {
-            // LANDSCAPE per Ripristino
-            doc.addPage('landscape');
+            // LANDSCAPE
+            doc.addPage('a4', 'l');
             y = 10;
 
             doc.setFontSize(10);
@@ -545,7 +547,7 @@ export default function ADMReportGenerator() {
         // ========================================
         // CALL CENTER (LANDSCAPE)
         // ========================================
-        doc.addPage('landscape');
+        doc.addPage('a4', 'l');
         y = 10;
 
         doc.setFontSize(10);
@@ -756,7 +758,7 @@ export default function ADMReportGenerator() {
         </div>
 
         <div className="mt-8 text-center text-gray-500 text-xs">
-          <p>Report ADM Generator v1.2</p>
+          <p>Report ADM Generator v1.3</p>
           <p className="mt-1">Rilevazioni sul Gioco Fisico ai fini del controllo dei Livelli di Servizio</p>
         </div>
       </div>
