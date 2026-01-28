@@ -23,7 +23,7 @@ export default function ADMReportGenerator() {
     tipologia: 'IPPICA E SPORT',
     titolareSistema: 'Exalogic SRL',
     localizzazioneCED: 'ROZZANO',
-    fornitoreServizio: 'FSC 88'
+    fornitoreServizio: 'SCOMMETTENDO SRL FSC 88'
   });
 
   const [files, setFiles] = useState({
@@ -41,7 +41,6 @@ export default function ADMReportGenerator() {
   const [generating, setGenerating] = useState(false);
   const [status, setStatus] = useState('');
 
-  // Parser functions
   const parsePrestazioni = (workbook) => {
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const data = XLSX.utils.sheet_to_json(sheet);
@@ -168,15 +167,17 @@ export default function ADMReportGenerator() {
         const margin = 15;
         let y = margin;
 
-        // === FRONTESPIZIO ===
-        doc.setFontSize(13);
+        // === PAGINA 1: FRONTESPIZIO ===
+        doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
         doc.text('Rilevazioni sul Gioco Fisico ai fini del controllo dei Livelli', margin, y);
-        y += 12;
+        y += 10;
 
         doc.setFontSize(10);
-        const fields = [
-          ['Anno sottoposto a verifica:', `Anno: ${frontespizio.anno}`],
+        doc.setFont('helvetica', 'normal');
+        
+        const infoFields = [
+          ['Anno sottoposto a verifica:', `Anno:${frontespizio.anno}`],
           ['Consegnato ad ADM:', frontespizio.dataConsegna],
           ['Concessionario:', frontespizio.concessionario],
           ['Codice Concessione:', frontespizio.codiceConcessione],
@@ -185,18 +186,20 @@ export default function ADMReportGenerator() {
           ['Localizzazione CED:', frontespizio.localizzazioneCED]
         ];
         
-        fields.forEach(([label, value]) => {
+        infoFields.forEach(([label, value]) => {
           doc.setFont('helvetica', 'bold');
           doc.text(label, margin, y);
           doc.setFont('helvetica', 'normal');
-          doc.text(value, margin + 55, y);
+          doc.text(value, margin + 50, y);
           y += 6;
         });
 
-        y += 8;
+        y += 10;
+        
+        // Tabella Giochi Pubblici
         doc.setFont('helvetica', 'bold');
         doc.text('Giochi Pubblici', margin, y);
-        doc.text('Fornitore del Servizio', margin + 100, y);
+        doc.text('Fornitore del Servizio', margin + 110, y);
         y += 6;
         
         doc.setFont('helvetica', 'normal');
@@ -210,29 +213,33 @@ export default function ADMReportGenerator() {
         ];
         giochi.forEach(g => {
           doc.text(g, margin, y);
-          doc.text(frontespizio.fornitoreServizio, margin + 100, y);
+          doc.text(frontespizio.fornitoreServizio, margin + 110, y);
           y += 5;
         });
 
-        // === PRESTAZIONI SISTEMA ===
+        // === PAGINE 2-5: PRESTAZIONI SISTEMA ===
         const prestazioniPages = [[1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12]];
         
-        prestazioniPages.forEach((mesiPage, pi) => {
+        prestazioniPages.forEach((mesiPage, pageIndex) => {
           doc.addPage();
           y = margin;
           
-          if (pi === 0) {
+          if (pageIndex === 0) {
             doc.setFontSize(11);
             doc.setFont('helvetica', 'bold');
             doc.text('1. Prestazioni del Sistema', margin, y);
-            y += 5;
+            y += 6;
             doc.setFontSize(8);
             doc.setFont('helvetica', 'normal');
             doc.text('(la durata dell\'operazione di vendita si considera al netto del tempo di elaborazione del Totalizzatore Nazionale)', margin, y);
+            y += 5;
+            doc.text('Durata operazione di vendita = tempo intercorrente tra la conferma della giocata e la stampa completa', margin, y);
             y += 4;
-            doc.text('Durata operazione di vendita = tempo intercorrente tra la conferma della giocata e la stampa completa della ricevuta.', margin, y);
+            doc.text('della ricevuta di partecipazione.', margin, y);
+            y += 5;
+            doc.text('Giocate = numero di transazioni', margin, y);
             y += 4;
-            doc.text('Giocate = numero di transazioni | Intervallo di rilevazione = un rigo per ogni settimana', margin, y);
+            doc.text('Intervallo di rilevazione = un rigo per ogni settimana', margin, y);
             y += 8;
           }
 
@@ -240,27 +247,38 @@ export default function ADMReportGenerator() {
             const meseData = parsedData.prestazioni[meseNum] || [];
             if (!meseData.length) return;
 
-            doc.setFillColor(240, 240, 240);
-            doc.rect(margin, y, 160, 7, 'F');
-            doc.rect(margin, y, 160, 7);
+            // Header mese
+            doc.setFillColor(230, 230, 230);
+            doc.rect(margin, y, 165, 6, 'F');
+            doc.rect(margin, y, 165, 6);
             doc.setFontSize(9);
             doc.setFont('helvetica', 'bold');
-            doc.text(`Mese: ${MESI[meseNum - 1]}`, margin + 2, y + 5);
-            doc.text('Giocate', margin + 50, y + 5);
-            doc.text('Giocate emesse in più di 5 secondi', margin + 80, y + 5);
-            doc.text('%', margin + 150, y + 5);
-            y += 7;
+            doc.text(`Mese: ${MESI[meseNum - 1]}`, margin + 2, y + 4);
+            doc.text('Giocate', margin + 55, y + 4);
+            doc.text('Giocate emesse in più di 5', margin + 90, y + 4);
+            doc.text('%', margin + 155, y + 4);
+            y += 6;
+            
+            // Subheader
+            doc.setFont('helvetica', 'normal');
+            doc.rect(margin, y, 165, 5);
+            doc.text('secondi', margin + 105, y + 3.5);
+            y += 5;
 
             let totG = 0, tot5 = 0, sumP = 0, countP = 0;
-            doc.setFont('helvetica', 'normal');
             
             meseData.forEach(r => {
-              doc.rect(margin, y, 160, 5);
-              doc.text(String(r.settimana || ''), margin + 2, y + 4);
-              doc.text(formatNumber(r.giocate), margin + 50, y + 4);
-              doc.text(formatNumber(r.giocate5sec), margin + 100, y + 4);
+              doc.rect(margin, y, 40, 5);
+              doc.rect(margin + 40, y, 45, 5);
+              doc.rect(margin + 85, y, 55, 5);
+              doc.rect(margin + 140, y, 25, 5);
+              
+              doc.text(String(r.settimana || ''), margin + 18, y + 3.5);
+              doc.text(formatNumber(r.giocate), margin + 60, y + 3.5);
+              doc.text(formatNumber(r.giocate5sec), margin + 110, y + 3.5);
               const perc = r.percentuale || 0;
-              doc.text(perc.toFixed(2).replace('.', ','), margin + 150, y + 4);
+              doc.text(perc.toFixed(2).replace('.', ','), margin + 148, y + 3.5);
+              
               totG += (r.giocate || 0);
               tot5 += (r.giocate5sec || 0);
               sumP += perc;
@@ -268,195 +286,320 @@ export default function ADMReportGenerator() {
               y += 5;
             });
 
-            doc.setFillColor(255, 255, 220);
-            doc.rect(margin, y, 160, 6, 'F');
-            doc.rect(margin, y, 160, 6);
+            // Riga Totale
+            doc.setFillColor(255, 255, 200);
+            doc.rect(margin, y, 40, 5, 'F');
+            doc.rect(margin + 40, y, 45, 5, 'F');
+            doc.rect(margin + 85, y, 55, 5, 'F');
+            doc.rect(margin + 140, y, 25, 5, 'F');
+            doc.rect(margin, y, 40, 5);
+            doc.rect(margin + 40, y, 45, 5);
+            doc.rect(margin + 85, y, 55, 5);
+            doc.rect(margin + 140, y, 25, 5);
+            
             doc.setFont('helvetica', 'bold');
-            doc.text('Totale', margin + 2, y + 4);
-            doc.text(formatNumber(totG), margin + 50, y + 4);
-            doc.text(formatNumber(tot5), margin + 100, y + 4);
+            doc.text('Totale', margin + 15, y + 3.5);
+            doc.text(formatNumber(totG), margin + 60, y + 3.5);
+            doc.text(formatNumber(tot5), margin + 110, y + 3.5);
             const avgP = countP > 0 ? sumP / countP : 0;
-            doc.text(avgP.toFixed(2).replace('.', ','), margin + 150, y + 4);
+            doc.text(avgP.toFixed(2).replace('.', ','), margin + 148, y + 3.5);
             y += 10;
 
             if (y > 260) { doc.addPage(); y = margin; }
           });
         });
 
-        // === DISPONIBILITÀ SISTEMA ===
-        const trim = [
+        // === PAGINE 6+: DISPONIBILITÀ SISTEMA ===
+        const trimestri = [
           ['GENNAIO', 'FEBBRAIO', 'MARZO'],
           ['APRILE', 'MAGGIO', 'GIUGNO'],
           ['LUGLIO', 'AGOSTO', 'SETTEMBRE'],
           ['OTTOBRE', 'NOVEMBRE', 'DICEMBRE']
         ];
 
+        // Genera 4 pagine per ogni tipo di gioco trovato
         Object.keys(parsedData.disponibilita).forEach(tipoGioco => {
           const tipoData = parsedData.disponibilita[tipoGioco];
 
-          trim.forEach(mesiTrim => {
+          trimestri.forEach((mesiTrimestre) => {
             doc.addPage('landscape');
-            y = 8;
+            y = 10;
 
+            // Titolo
             doc.setFontSize(10);
             doc.setFont('helvetica', 'bold');
             doc.text('2. Disponibilità del sistema di elaborazione e della rete telematica', 10, y);
-            y += 4;
-            doc.setFontSize(7);
+            y += 5;
+            
+            doc.setFontSize(8);
             doc.setFont('helvetica', 'normal');
             doc.text('Per ogni giorno si considera Fascia Oraria l\'intervallo di tempo del funzionamento del Totalizzatore Nazionale ovvero dalle ore 07:00 alle ore 23:00', 10, y);
-            y += 5;
+            y += 6;
 
-            let xPos = 10;
-            doc.text('TipoGioco:', xPos, y);
-            xPos += 18;
-            TIPI_GIOCO.forEach(t => {
-              const sel = t === tipoGioco;
-              if (sel) {
-                doc.setFillColor(255, 255, 220);
-                doc.rect(xPos, y - 3, 14, 5, 'F');
-              }
-              doc.rect(xPos, y - 3, 14, 5);
-              doc.text(`${t} ${sel ? '■' : '□'}`, xPos + 1, y);
-              xPos += 15;
+            // TipoGioco checkboxes - TUTTI selezionati con ■
+            doc.setFontSize(8);
+            doc.text('TipoGioco:', 10, y);
+            let xCheck = 35;
+            TIPI_GIOCO.forEach(tipo => {
+              doc.text(`${tipo}`, xCheck, y);
+              doc.text('■', xCheck + 12, y);
+              xCheck += 25;
             });
             y += 8;
 
-            const cw = 88;
-            mesiTrim.forEach((mn, mi) => {
-              const sx = 10 + mi * cw;
-              doc.setFillColor(255, 255, 220);
-              doc.rect(sx, y, cw - 3, 6, 'F');
-              doc.rect(sx, y, cw - 3, 6);
+            // Tabelle dei 3 mesi affiancate
+            const colWidth = 90;
+            const startX = 10;
+
+            // Headers dei mesi
+            mesiTrimestre.forEach((nomeMese, idx) => {
+              const xBase = startX + (idx * colWidth);
+              
+              // Header mese
+              doc.setFillColor(255, 255, 200);
+              doc.rect(xBase, y, colWidth - 5, 6, 'F');
+              doc.rect(xBase, y, colWidth - 5, 6);
               doc.setFont('helvetica', 'bold');
               doc.setFontSize(8);
-              doc.text(`mese: ${mn}`, sx + 2, y + 4);
+              doc.text(`mese:`, xBase + 2, y + 4);
+              doc.text(nomeMese, xBase + 15, y + 4);
             });
             y += 6;
 
+            // Subheaders (giorno | disponibilità%)
+            mesiTrimestre.forEach((_, idx) => {
+              const xBase = startX + (idx * colWidth);
+              doc.setFont('helvetica', 'bold');
+              doc.setFontSize(7);
+              doc.rect(xBase, y, 25, 5);
+              doc.rect(xBase + 25, y, colWidth - 30, 5);
+              doc.text('giorno', xBase + 8, y + 3.5);
+              doc.text('disponibilità%', xBase + 45, y + 3.5);
+            });
+            y += 5;
+
+            // Righe dati (31 giorni)
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(7);
             
-            for (let g = 1; g <= 31; g++) {
-              mesiTrim.forEach((mn, mi) => {
-                const sx = 10 + mi * cw;
-                const meseData = tipoData[mn] || [];
-                const dd = meseData.find(d => d.giorno === g);
+            for (let giorno = 1; giorno <= 31; giorno++) {
+              mesiTrimestre.forEach((nomeMese, idx) => {
+                const xBase = startX + (idx * colWidth);
+                const meseData = tipoData[nomeMese] || [];
+                const dayData = meseData.find(d => d.giorno === giorno);
                 
-                doc.rect(sx, y, 30, 4.5);
-                doc.rect(sx + 30, y, 55, 4.5);
+                doc.rect(xBase, y, 25, 4);
+                doc.rect(xBase + 25, y, colWidth - 30, 4);
                 
-                doc.text(String(g), sx + 12, y + 3.2);
-                if (dd) {
-                  doc.text(dd.disponibilita.toFixed(2).replace('.', ','), sx + 55, y + 3.2);
+                doc.text(String(giorno), xBase + 10, y + 2.8);
+                if (dayData) {
+                  doc.text(dayData.disponibilita.toFixed(2).replace('.', ','), xBase + 50, y + 2.8);
                 }
               });
-              y += 4.5;
+              y += 4;
             }
 
-            doc.setFillColor(255, 255, 220);
-            mesiTrim.forEach((mn, mi) => {
-              const sx = 10 + mi * cw;
-              const meseData = tipoData[mn] || [];
-              const avg = meseData.length ? meseData.reduce((s, d) => s + d.disponibilita, 0) / meseData.length : 0;
-              doc.rect(sx, y, cw - 3, 5, 'F');
-              doc.rect(sx, y, cw - 3, 5);
+            // Riga Totale
+            doc.setFillColor(255, 255, 200);
+            mesiTrimestre.forEach((nomeMese, idx) => {
+              const xBase = startX + (idx * colWidth);
+              const meseData = tipoData[nomeMese] || [];
+              const media = meseData.length > 0 
+                ? meseData.reduce((sum, d) => sum + d.disponibilita, 0) / meseData.length 
+                : 0;
+              
+              doc.rect(xBase, y, 25, 5, 'F');
+              doc.rect(xBase + 25, y, colWidth - 30, 5, 'F');
+              doc.rect(xBase, y, 25, 5);
+              doc.rect(xBase + 25, y, colWidth - 30, 5);
+              
               doc.setFont('helvetica', 'bold');
-              doc.text('Totale', sx + 2, y + 3.5);
-              doc.text(avg.toFixed(2).replace('.', ','), sx + 55, y + 3.5);
+              doc.text('Totale', xBase + 5, y + 3.5);
+              doc.text(media.toFixed(2).replace('.', ','), xBase + 50, y + 3.5);
             });
           });
         });
 
-        // === RIPRISTINO SISTEMA ===
+        // === PAGINE RIPRISTINO SISTEMA ===
         if (parsedData.ripristino) {
-          trim.forEach(mesiTrim => {
+          trimestri.forEach((mesiTrimestre) => {
             doc.addPage('landscape');
-            y = 8;
+            y = 10;
+
+            // Titolo
             doc.setFontSize(10);
             doc.setFont('helvetica', 'bold');
             doc.text('Ripristino del Sistema in caso di malfunzionamento', 10, y);
-            y += 4;
+            y += 5;
+            
             doc.setFontSize(8);
             doc.setFont('helvetica', 'normal');
-            doc.text('Tempo = tempo di risoluzione espresso in secondi', 10, y);
-            y += 5;
+            doc.text('Tempo = tempo di risoluzione espresso in ore', 10, y);
+            y += 6;
 
-            let xPos = 10;
+            // TipoGioco checkboxes - solo "Tutti" selezionato
             doc.setFontSize(7);
-            doc.text('TipoGioco:', xPos, y);
-            xPos += 18;
-            TIPI_GIOCO.forEach(t => {
-              const sel = t === 'Tutti';
-              if (sel) {
-                doc.setFillColor(255, 255, 220);
-                doc.rect(xPos, y - 3, 14, 5, 'F');
+            doc.text('TipoGioco:', 10, y);
+            let xCheck = 30;
+            TIPI_GIOCO.forEach(tipo => {
+              doc.text(tipo, xCheck, y);
+              // Solo "Tutti" ha il checkbox pieno
+              if (tipo === 'Tutti') {
+                doc.text('■', xCheck + 10, y);
               }
-              doc.rect(xPos, y - 3, 14, 5);
-              doc.text(`${t} ${sel ? '■' : '□'}`, xPos + 1, y);
-              xPos += 15;
+              xCheck += 18;
             });
             y += 8;
 
+            // Due sezioni: Con limitazione | Senza limitazione
+            const sectionWidth = 135;
+            
+            // Headers sezioni
             doc.setFont('helvetica', 'bold');
-            doc.text('Con limitazione del gioco', 60, y);
+            doc.setFontSize(8);
+            doc.text('Con limitazione del gioco', 50, y);
+            doc.text('Senza limitazione del gioco', 185, y);
             y += 5;
 
-            const cw = 42;
-            mesiTrim.forEach((mn, mi) => {
-              const sx = 10 + mi * cw;
-              doc.setFillColor(255, 255, 220);
-              doc.rect(sx, y, cw - 2, 5, 'F');
-              doc.rect(sx, y, cw - 2, 5);
+            // Headers mesi per entrambe le sezioni
+            const colW = 42;
+            
+            // Sezione SX - Con limitazione
+            mesiTrimestre.forEach((nomeMese, idx) => {
+              const xBase = 10 + (idx * colW);
+              doc.setFillColor(255, 255, 200);
+              doc.rect(xBase, y, colW - 2, 5, 'F');
+              doc.rect(xBase, y, colW - 2, 5);
               doc.setFontSize(7);
-              doc.text(`mese: ${mn}`, sx + 2, y + 3.5);
+              doc.text(`mese:`, xBase + 2, y + 3.5);
+              doc.text(nomeMese, xBase + 12, y + 3.5);
+            });
+            
+            // Sezione DX - Senza limitazione
+            mesiTrimestre.forEach((nomeMese, idx) => {
+              const xBase = 145 + (idx * colW);
+              doc.setFillColor(255, 255, 200);
+              doc.rect(xBase, y, colW - 2, 5, 'F');
+              doc.rect(xBase, y, colW - 2, 5);
+              doc.text(`mese: ${nomeMese}`, xBase + 2, y + 3.5);
             });
             y += 5;
 
+            // Subheaders (giorno | chiamate | tempo)
             doc.setFontSize(6);
-            mesiTrim.forEach((_, mi) => {
-              const sx = 10 + mi * cw;
-              doc.rect(sx, y, 10, 4);
-              doc.rect(sx + 10, y, 14, 4);
-              doc.rect(sx + 24, y, 16, 4);
-              doc.text('g', sx + 3, y + 3);
-              doc.text('chiam', sx + 11, y + 3);
-              doc.text('tempo', sx + 25, y + 3);
+            
+            // Sezione SX
+            mesiTrimestre.forEach((_, idx) => {
+              const xBase = 10 + (idx * colW);
+              doc.rect(xBase, y, 10, 4);
+              doc.rect(xBase + 10, y, 15, 4);
+              doc.rect(xBase + 25, y, 15, 4);
+              doc.text('giorno', xBase + 1, y + 2.8);
+              doc.text('chiamate', xBase + 11, y + 2.8);
+              doc.text('tempo', xBase + 26, y + 2.8);
+            });
+            
+            // Sezione DX
+            mesiTrimestre.forEach((_, idx) => {
+              const xBase = 145 + (idx * colW);
+              doc.rect(xBase, y, 10, 4);
+              doc.rect(xBase + 10, y, 15, 4);
+              doc.rect(xBase + 25, y, 15, 4);
+              doc.text('giorno', xBase + 1, y + 2.8);
+              doc.text('chiamate', xBase + 11, y + 2.8);
+              doc.text('tempo', xBase + 26, y + 2.8);
             });
             y += 4;
 
+            // Righe dati (31 giorni)
             doc.setFont('helvetica', 'normal');
-            for (let g = 1; g <= 31; g++) {
-              mesiTrim.forEach((mn, mi) => {
-                const meseNum = MESI.indexOf(mn) + 1;
-                const sx = 10 + mi * cw;
-                const dd = parsedData.ripristino[meseNum]?.[g];
-                doc.rect(sx, y, 10, 3.8);
-                doc.rect(sx + 10, y, 14, 3.8);
-                doc.rect(sx + 24, y, 16, 3.8);
-                doc.text(String(g), sx + 3, y + 2.8);
-                if (dd?.chiamate) {
-                  doc.text(String(dd.chiamate), sx + 13, y + 2.8);
-                  doc.text(`${dd.tempo}`, sx + 25, y + 2.8);
+            
+            for (let giorno = 1; giorno <= 31; giorno++) {
+              // Sezione SX - Con limitazione (dati reali)
+              mesiTrimestre.forEach((nomeMese, idx) => {
+                const xBase = 10 + (idx * colW);
+                const meseNum = MESI.indexOf(nomeMese) + 1;
+                const dayData = parsedData.ripristino[meseNum]?.[giorno];
+                
+                doc.rect(xBase, y, 10, 3.5);
+                doc.rect(xBase + 10, y, 15, 3.5);
+                doc.rect(xBase + 25, y, 15, 3.5);
+                
+                doc.text(String(giorno), xBase + 3, y + 2.5);
+                if (dayData && dayData.chiamate > 0) {
+                  doc.text(String(dayData.chiamate), xBase + 14, y + 2.5);
+                  doc.text(`${dayData.tempo} sec`, xBase + 26, y + 2.5);
                 }
               });
-              y += 3.8;
+              
+              // Sezione DX - Senza limitazione (vuota)
+              mesiTrimestre.forEach((_, idx) => {
+                const xBase = 145 + (idx * colW);
+                doc.rect(xBase, y, 10, 3.5);
+                doc.rect(xBase + 10, y, 15, 3.5);
+                doc.rect(xBase + 25, y, 15, 3.5);
+                doc.text(String(giorno), xBase + 3, y + 2.5);
+              });
+              
+              y += 3.5;
             }
           });
         }
 
-        // === CALL CENTER (vuoto) ===
-        doc.addPage();
-        y = margin;
-        doc.setFontSize(11);
-        doc.setFont('helvetica', 'bold');
-        doc.text('3. Disponibilità Call Center (opzionale)', margin, y);
-        y += 6;
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        doc.text('Indicare il tempo o il numero di casi fuori percentuale', margin, y);
+        // === ULTIMA PAGINA: CALL CENTER ===
+        doc.addPage('landscape');
+        y = 10;
 
-        // Save PDF
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('3. Disponibilità Call Center (opzionale)', 10, y);
+        y += 5;
+        
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Indicare il tempo o il numero di casi fuori percentuale', 10, y);
+        y += 8;
+
+        // Header con 3 mesi vuoti
+        const ccColW = 90;
+        ['mese:', 'mese:', 'mese:'].forEach((_, idx) => {
+          const xBase = 10 + (idx * ccColW);
+          doc.setFillColor(255, 255, 200);
+          doc.rect(xBase, y, ccColW - 5, 5, 'F');
+          doc.rect(xBase, y, ccColW - 5, 5);
+          doc.text('mese:', xBase + 2, y + 3.5);
+        });
+        y += 5;
+
+        // Subheaders
+        doc.setFontSize(6);
+        [0, 1, 2].forEach((idx) => {
+          const xBase = 10 + (idx * ccColW);
+          doc.rect(xBase, y, 15, 4);
+          doc.rect(xBase + 15, y, 25, 4);
+          doc.rect(xBase + 40, y, 20, 4);
+          doc.rect(xBase + 60, y, 25, 4);
+          doc.text('giorno', xBase + 2, y + 2.8);
+          doc.text('informativa', xBase + 17, y + 2.8);
+          doc.text('tempo', xBase + 42, y + 2.8);
+          doc.text('correttiva', xBase + 62, y + 2.8);
+        });
+        y += 4;
+
+        // Righe vuote
+        for (let giorno = 1; giorno <= 31; giorno++) {
+          [0, 1, 2].forEach((idx) => {
+            const xBase = 10 + (idx * ccColW);
+            doc.rect(xBase, y, 15, 3.5);
+            doc.rect(xBase + 15, y, 25, 3.5);
+            doc.rect(xBase + 40, y, 20, 3.5);
+            doc.rect(xBase + 60, y, 25, 3.5);
+            doc.text(String(giorno), xBase + 5, y + 2.5);
+          });
+          y += 3.5;
+        }
+
+        // Salva PDF
         doc.save(`Report_ADM_${frontespizio.codiceConcessione}_${frontespizio.anno}.pdf`);
         setStatus('✅ PDF generato e scaricato con successo!');
         
@@ -474,7 +617,6 @@ export default function ADMReportGenerator() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-4 md:p-6">
       <div className="max-w-3xl mx-auto">
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-yellow-400 mb-2">
             🎰 Generatore Report ADM
@@ -484,7 +626,6 @@ export default function ADMReportGenerator() {
           </p>
         </div>
 
-        {/* Step 1: Frontespizio */}
         <div className="bg-gray-800/60 backdrop-blur rounded-2xl p-5 md:p-6 mb-4 border border-gray-700">
           <h2 className="text-lg font-bold text-yellow-400 mb-4 flex items-center gap-3">
             <span className="bg-yellow-400 text-black w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">1</span>
@@ -513,7 +654,6 @@ export default function ADMReportGenerator() {
           </div>
         </div>
 
-        {/* Step 2: Upload Files */}
         <div className="bg-gray-800/60 backdrop-blur rounded-2xl p-5 md:p-6 mb-4 border border-gray-700">
           <h2 className="text-lg font-bold text-yellow-400 mb-4 flex items-center gap-3">
             <span className="bg-yellow-400 text-black w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">2</span>
@@ -561,7 +701,6 @@ export default function ADMReportGenerator() {
           </div>
         </div>
 
-        {/* Step 3: Generate */}
         <div className="bg-gray-800/60 backdrop-blur rounded-2xl p-5 md:p-6 border border-gray-700">
           <h2 className="text-lg font-bold text-yellow-400 mb-4 flex items-center gap-3">
             <span className="bg-yellow-400 text-black w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">3</span>
@@ -621,9 +760,8 @@ export default function ADMReportGenerator() {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="mt-8 text-center text-gray-500 text-xs">
-          <p>Report ADM Generator v1.0</p>
+          <p>Report ADM Generator v1.1</p>
           <p className="mt-1">Rilevazioni sul Gioco Fisico ai fini del controllo dei Livelli di Servizio</p>
         </div>
       </div>
