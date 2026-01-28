@@ -834,7 +834,7 @@ export default function ADMReportGenerator() {
         </div>
 
         <div className="mt-10 text-center text-gray-600 text-xs">
-          <p>Template ADM Generator v1.8</p>
+          <p>Template ADM Generator v1.8 | By Massimino Federico</p>
         </div>
       </div>
     </div>
