@@ -680,20 +680,20 @@ export default function ADMReportGenerator() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-4 md:p-6">
+    <div className="min-h-screen bg-[#0c161c] text-white p-4 md:p-6">
       <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-yellow-400 mb-2">
-            🎰 Generatore Report ADM
+        <div className="text-center mb-10">
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-2 tracking-tight">
+            Generatore Livelli Servizio Template ADM
           </h1>
-          <p className="text-gray-400 text-sm md:text-base">
+          <p className="text-gray-400 text-sm">
             Rilevazioni sul Gioco Fisico - Controllo Livelli di Servizio
           </p>
         </div>
 
-        <div className="bg-gray-800/60 backdrop-blur rounded-2xl p-5 md:p-6 mb-4 border border-gray-700">
-          <h2 className="text-lg font-bold text-yellow-400 mb-4 flex items-center gap-3">
-            <span className="bg-yellow-400 text-black w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">1</span>
+        <div className="bg-[#1a2633] rounded-xl p-5 md:p-6 mb-4 border border-[#2a3744]">
+          <h2 className="text-base font-semibold text-white mb-4 flex items-center gap-3">
+            <span className="bg-white text-[#0c161c] w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">1</span>
             Dati Frontespizio
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -712,16 +712,16 @@ export default function ADMReportGenerator() {
                 <input
                   value={frontespizio[key]}
                   onChange={(e) => setFrontespizio(p => ({ ...p, [key]: e.target.value }))}
-                  className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:border-yellow-400 focus:outline-none focus:ring-1 focus:ring-yellow-400/50 transition"
+                  className="w-full bg-[#0c161c] border border-[#2a3744] rounded-lg px-3 py-2 text-sm text-white focus:border-white focus:outline-none transition"
                 />
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-gray-800/60 backdrop-blur rounded-2xl p-5 md:p-6 mb-4 border border-gray-700">
-          <h2 className="text-lg font-bold text-yellow-400 mb-4 flex items-center gap-3">
-            <span className="bg-yellow-400 text-black w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">2</span>
+        <div className="bg-[#1a2633] rounded-xl p-5 md:p-6 mb-4 border border-[#2a3744]">
+          <h2 className="text-base font-semibold text-white mb-4 flex items-center gap-3">
+            <span className="bg-white text-[#0c161c] w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">2</span>
             Upload File Excel
           </h2>
           <div className="space-y-3">
@@ -732,26 +732,26 @@ export default function ADMReportGenerator() {
             ].map(({ type, icon, label, required, desc }) => (
               <div 
                 key={type} 
-                className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${
+                className={`flex items-center gap-4 p-4 rounded-lg border transition-all ${
                   files[type] 
-                    ? 'bg-green-900/20 border-green-600/50' 
-                    : 'bg-gray-700/30 border-gray-600/50 hover:border-gray-500'
+                    ? 'bg-[#0c161c] border-white/30' 
+                    : 'bg-[#0c161c] border-[#2a3744] hover:border-white/20'
                 }`}
               >
-                <div className="text-2xl">{icon}</div>
+                <div className="text-xl opacity-60">{icon}</div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm md:text-base">
-                    {label} {required && <span className="text-red-400 text-xs">*obbligatorio</span>}
+                  <h3 className="font-medium text-sm text-white">
+                    {label} {required && <span className="text-gray-500 text-xs font-normal">*</span>}
                   </h3>
                   <p className="text-xs text-gray-500 truncate">{desc}</p>
                   {files[type] && (
-                    <p className="text-xs text-green-400 mt-1">✓ {files[type].name}</p>
+                    <p className="text-xs text-white/70 mt-1">✓ {files[type].name}</p>
                   )}
                 </div>
-                <label className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-semibold transition-all flex-shrink-0 ${
+                <label className={`cursor-pointer px-4 py-2 rounded-lg text-xs font-semibold transition-all flex-shrink-0 ${
                   files[type]
-                    ? 'bg-green-600 text-white hover:bg-green-500'
-                    : 'bg-yellow-400 text-black hover:bg-yellow-300 hover:scale-105'
+                    ? 'bg-white/10 text-white border border-white/20'
+                    : 'bg-white text-[#0c161c] hover:bg-gray-200'
                 }`}>
                   {files[type] ? '✓ Caricato' : 'Scegli file'}
                   <input
@@ -766,17 +766,17 @@ export default function ADMReportGenerator() {
           </div>
         </div>
 
-        <div className="bg-gray-800/60 backdrop-blur rounded-2xl p-5 md:p-6 border border-gray-700">
-          <h2 className="text-lg font-bold text-yellow-400 mb-4 flex items-center gap-3">
-            <span className="bg-yellow-400 text-black w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">3</span>
+        <div className="bg-[#1a2633] rounded-xl p-5 md:p-6 border border-[#2a3744]">
+          <h2 className="text-base font-semibold text-white mb-4 flex items-center gap-3">
+            <span className="bg-white text-[#0c161c] w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">3</span>
             Genera Report PDF
           </h2>
 
           {status && (
-            <div className={`p-4 rounded-xl mb-4 text-sm ${
-              status.includes('✅') ? 'bg-green-900/30 text-green-300 border border-green-700' :
-              status.includes('❌') ? 'bg-red-900/30 text-red-300 border border-red-700' :
-              'bg-blue-900/30 text-blue-300 border border-blue-700'
+            <div className={`p-3 rounded-lg mb-4 text-sm ${
+              status.includes('✅') ? 'bg-white/10 text-white border border-white/20' :
+              status.includes('❌') ? 'bg-red-900/30 text-red-300 border border-red-800' :
+              'bg-white/5 text-gray-300 border border-white/10'
             }`}>
               {status}
             </div>
@@ -785,57 +785,56 @@ export default function ADMReportGenerator() {
           <button
             onClick={generatePDF}
             disabled={generating || !canGenerate}
-            className={`w-full py-4 rounded-xl font-bold text-lg transition-all transform ${
+            className={`w-full py-3 rounded-lg font-semibold text-sm transition-all ${
               generating || !canGenerate
-                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-black hover:from-yellow-300 hover:to-yellow-400 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-yellow-400/20'
+                ? 'bg-[#2a3744] text-gray-500 cursor-not-allowed'
+                : 'bg-white text-[#0c161c] hover:bg-gray-200 active:scale-[0.99]'
             }`}
           >
             {generating ? (
               <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                 </svg>
                 Generazione in corso...
               </span>
             ) : canGenerate ? (
-              '📄 GENERA PDF REPORT ADM'
+              'GENERA PDF'
             ) : (
-              '⚠️ Carica i file obbligatori'
+              'Carica i file obbligatori'
             )}
           </button>
 
           {/* Bottone Reset */}
           <button
             onClick={handleReset}
-            className="w-full mt-3 py-3 rounded-xl font-semibold text-sm transition-all transform bg-gray-700 text-gray-300 hover:bg-red-600 hover:text-white hover:scale-[1.01] active:scale-[0.99] border border-gray-600 hover:border-red-500"
+            className="w-full mt-3 py-2.5 rounded-lg font-medium text-xs transition-all bg-transparent text-gray-400 hover:text-white border border-[#2a3744] hover:border-white/30"
           >
-            🔄 RESET - Pulisci Tutti i Dati
+            Reset
           </button>
 
           <div className="mt-4 flex flex-wrap gap-2 justify-center">
             {files.prestazioni && (
-              <span className="inline-flex items-center gap-1 bg-gray-700 px-3 py-1 rounded-full text-xs">
+              <span className="inline-flex items-center gap-1 bg-white/10 border border-white/20 px-3 py-1 rounded text-xs text-white/80">
                 ✓ Prestazioni
               </span>
             )}
             {files.disponibilita && (
-              <span className="inline-flex items-center gap-1 bg-gray-700 px-3 py-1 rounded-full text-xs">
+              <span className="inline-flex items-center gap-1 bg-white/10 border border-white/20 px-3 py-1 rounded text-xs text-white/80">
                 ✓ Disponibilità
               </span>
             )}
             {files.ripristino && (
-              <span className="inline-flex items-center gap-1 bg-gray-700 px-3 py-1 rounded-full text-xs">
+              <span className="inline-flex items-center gap-1 bg-white/10 border border-white/20 px-3 py-1 rounded text-xs text-white/80">
                 ✓ Ripristino
               </span>
             )}
           </div>
         </div>
 
-        <div className="mt-8 text-center text-gray-500 text-xs">
-          <p>Report ADM Generator v1.7</p>
-          <p className="mt-1">Rilevazioni sul Gioco Fisico ai fini del controllo dei Livelli di Servizio</p>
+        <div className="mt-10 text-center text-gray-600 text-xs">
+          <p>Template ADM Generator v1.8</p>
         </div>
       </div>
     </div>
