@@ -163,11 +163,13 @@ export default function ADMReportGenerator() {
 
     setTimeout(() => {
       try {
+        // ========================================
+        // PAGINA 1: FRONTESPIZIO (PORTRAIT)
+        // ========================================
         const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
         const margin = 15;
         let y = margin;
 
-        // === PAGINA 1: FRONTESPIZIO ===
         doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
         doc.text('Rilevazioni sul Gioco Fisico ai fini del controllo dei Livelli', margin, y);
@@ -196,7 +198,6 @@ export default function ADMReportGenerator() {
 
         y += 10;
         
-        // Tabella Giochi Pubblici
         doc.setFont('helvetica', 'bold');
         doc.text('Giochi Pubblici', margin, y);
         doc.text('Fornitore del Servizio', margin + 110, y);
@@ -217,11 +218,13 @@ export default function ADMReportGenerator() {
           y += 5;
         });
 
-        // === PAGINE 2-5: PRESTAZIONI SISTEMA ===
+        // ========================================
+        // PAGINE 2-5: PRESTAZIONI (PORTRAIT)
+        // ========================================
         const prestazioniPages = [[1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12]];
         
         prestazioniPages.forEach((mesiPage, pageIndex) => {
-          doc.addPage();
+          doc.addPage('portrait');
           y = margin;
           
           if (pageIndex === 0) {
@@ -247,7 +250,6 @@ export default function ADMReportGenerator() {
             const meseData = parsedData.prestazioni[meseNum] || [];
             if (!meseData.length) return;
 
-            // Header mese
             doc.setFillColor(230, 230, 230);
             doc.rect(margin, y, 165, 6, 'F');
             doc.rect(margin, y, 165, 6);
@@ -259,7 +261,6 @@ export default function ADMReportGenerator() {
             doc.text('%', margin + 155, y + 4);
             y += 6;
             
-            // Subheader
             doc.setFont('helvetica', 'normal');
             doc.rect(margin, y, 165, 5);
             doc.text('secondi', margin + 105, y + 3.5);
@@ -286,7 +287,6 @@ export default function ADMReportGenerator() {
               y += 5;
             });
 
-            // Riga Totale
             doc.setFillColor(255, 255, 200);
             doc.rect(margin, y, 40, 5, 'F');
             doc.rect(margin + 40, y, 45, 5, 'F');
@@ -305,11 +305,13 @@ export default function ADMReportGenerator() {
             doc.text(avgP.toFixed(2).replace('.', ','), margin + 148, y + 3.5);
             y += 10;
 
-            if (y > 260) { doc.addPage(); y = margin; }
+            if (y > 260) { doc.addPage('portrait'); y = margin; }
           });
         });
 
-        // === PAGINE 6+: DISPONIBILITÀ SISTEMA ===
+        // ========================================
+        // DISPONIBILITÀ SISTEMA (LANDSCAPE)
+        // ========================================
         const trimestri = [
           ['GENNAIO', 'FEBBRAIO', 'MARZO'],
           ['APRILE', 'MAGGIO', 'GIUGNO'],
@@ -317,15 +319,14 @@ export default function ADMReportGenerator() {
           ['OTTOBRE', 'NOVEMBRE', 'DICEMBRE']
         ];
 
-        // Genera 4 pagine per ogni tipo di gioco trovato
         Object.keys(parsedData.disponibilita).forEach(tipoGioco => {
           const tipoData = parsedData.disponibilita[tipoGioco];
 
           trimestri.forEach((mesiTrimestre) => {
+            // LANDSCAPE per Disponibilità
             doc.addPage('landscape');
             y = 10;
 
-            // Titolo
             doc.setFontSize(10);
             doc.setFont('helvetica', 'bold');
             doc.text('2. Disponibilità del sistema di elaborazione e della rete telematica', 10, y);
@@ -347,7 +348,6 @@ export default function ADMReportGenerator() {
             });
             y += 8;
 
-            // Tabelle dei 3 mesi affiancate
             const colWidth = 90;
             const startX = 10;
 
@@ -355,7 +355,6 @@ export default function ADMReportGenerator() {
             mesiTrimestre.forEach((nomeMese, idx) => {
               const xBase = startX + (idx * colWidth);
               
-              // Header mese
               doc.setFillColor(255, 255, 200);
               doc.rect(xBase, y, colWidth - 5, 6, 'F');
               doc.rect(xBase, y, colWidth - 5, 6);
@@ -420,13 +419,15 @@ export default function ADMReportGenerator() {
           });
         });
 
-        // === PAGINE RIPRISTINO SISTEMA ===
+        // ========================================
+        // RIPRISTINO SISTEMA (LANDSCAPE)
+        // ========================================
         if (parsedData.ripristino) {
           trimestri.forEach((mesiTrimestre) => {
+            // LANDSCAPE per Ripristino
             doc.addPage('landscape');
             y = 10;
 
-            // Titolo
             doc.setFontSize(10);
             doc.setFont('helvetica', 'bold');
             doc.text('Ripristino del Sistema in caso di malfunzionamento', 10, y);
@@ -443,7 +444,6 @@ export default function ADMReportGenerator() {
             let xCheck = 30;
             TIPI_GIOCO.forEach(tipo => {
               doc.text(tipo, xCheck, y);
-              // Solo "Tutti" ha il checkbox pieno
               if (tipo === 'Tutti') {
                 doc.text('■', xCheck + 10, y);
               }
@@ -452,19 +452,15 @@ export default function ADMReportGenerator() {
             y += 8;
 
             // Due sezioni: Con limitazione | Senza limitazione
-            const sectionWidth = 135;
-            
-            // Headers sezioni
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(8);
             doc.text('Con limitazione del gioco', 50, y);
             doc.text('Senza limitazione del gioco', 185, y);
             y += 5;
 
-            // Headers mesi per entrambe le sezioni
             const colW = 42;
             
-            // Sezione SX - Con limitazione
+            // Headers mesi - Sezione SX
             mesiTrimestre.forEach((nomeMese, idx) => {
               const xBase = 10 + (idx * colW);
               doc.setFillColor(255, 255, 200);
@@ -475,7 +471,7 @@ export default function ADMReportGenerator() {
               doc.text(nomeMese, xBase + 12, y + 3.5);
             });
             
-            // Sezione DX - Senza limitazione
+            // Headers mesi - Sezione DX
             mesiTrimestre.forEach((nomeMese, idx) => {
               const xBase = 145 + (idx * colW);
               doc.setFillColor(255, 255, 200);
@@ -546,7 +542,9 @@ export default function ADMReportGenerator() {
           });
         }
 
-        // === ULTIMA PAGINA: CALL CENTER ===
+        // ========================================
+        // CALL CENTER (LANDSCAPE)
+        // ========================================
         doc.addPage('landscape');
         y = 10;
 
@@ -560,7 +558,6 @@ export default function ADMReportGenerator() {
         doc.text('Indicare il tempo o il numero di casi fuori percentuale', 10, y);
         y += 8;
 
-        // Header con 3 mesi vuoti
         const ccColW = 90;
         ['mese:', 'mese:', 'mese:'].forEach((_, idx) => {
           const xBase = 10 + (idx * ccColW);
@@ -571,7 +568,6 @@ export default function ADMReportGenerator() {
         });
         y += 5;
 
-        // Subheaders
         doc.setFontSize(6);
         [0, 1, 2].forEach((idx) => {
           const xBase = 10 + (idx * ccColW);
@@ -586,7 +582,6 @@ export default function ADMReportGenerator() {
         });
         y += 4;
 
-        // Righe vuote
         for (let giorno = 1; giorno <= 31; giorno++) {
           [0, 1, 2].forEach((idx) => {
             const xBase = 10 + (idx * ccColW);
@@ -761,7 +756,7 @@ export default function ADMReportGenerator() {
         </div>
 
         <div className="mt-8 text-center text-gray-500 text-xs">
-          <p>Report ADM Generator v1.1</p>
+          <p>Report ADM Generator v1.2</p>
           <p className="mt-1">Rilevazioni sul Gioco Fisico ai fini del controllo dei Livelli di Servizio</p>
         </div>
       </div>
