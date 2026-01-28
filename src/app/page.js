@@ -170,16 +170,20 @@ export default function ADMReportGenerator() {
         const margin = 15;
         let y = margin;
 
-        doc.setFontSize(12);
+        // Titolo principale
+        doc.setFontSize(14);
         doc.setFont('helvetica', 'bold');
         doc.text('Rilevazioni sul Gioco Fisico ai fini del controllo dei Livelli', margin, y);
-        y += 10;
+        y += 12;
 
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        
+        // === TABELLA DATI FRONTESPIZIO ===
+        const tableWidth = 170;
+        const col1Width = 55;
+        const col2Width = 115;
+        const rowHeight = 8;
+
         const infoFields = [
-          ['Anno sottoposto a verifica:', `Anno:${frontespizio.anno}`],
+          ['Anno sottoposto a verifica:', `Anno: ${frontespizio.anno}`],
           ['Consegnato ad ADM:', frontespizio.dataConsegna],
           ['Concessionario:', frontespizio.concessionario],
           ['Codice Concessione:', frontespizio.codiceConcessione],
@@ -187,22 +191,43 @@ export default function ADMReportGenerator() {
           ['Titolare di Sistema:', frontespizio.titolareSistema],
           ['Localizzazione CED:', frontespizio.localizzazioneCED]
         ];
-        
+
+        doc.setFontSize(10);
         infoFields.forEach(([label, value]) => {
+          // Cella label (sfondo grigio chiaro)
+          doc.setFillColor(240, 240, 240);
+          doc.rect(margin, y, col1Width, rowHeight, 'F');
+          doc.rect(margin, y, col1Width, rowHeight);
           doc.setFont('helvetica', 'bold');
-          doc.text(label, margin, y);
+          doc.text(label, margin + 2, y + 5.5);
+          
+          // Cella valore
+          doc.rect(margin + col1Width, y, col2Width, rowHeight);
           doc.setFont('helvetica', 'normal');
-          doc.text(value, margin + 50, y);
-          y += 6;
+          doc.text(value, margin + col1Width + 3, y + 5.5);
+          
+          y += rowHeight;
         });
 
-        y += 10;
+        y += 12;
+
+        // === TABELLA GIOCHI PUBBLICI ===
+        const giochiColWidth = 110;
+        const fornitoreColWidth = 60;
+        
+        // Header tabella
+        doc.setFillColor(230, 230, 230);
+        doc.rect(margin, y, giochiColWidth, rowHeight, 'F');
+        doc.rect(margin, y, giochiColWidth, rowHeight);
+        doc.rect(margin + giochiColWidth, y, fornitoreColWidth, rowHeight, 'F');
+        doc.rect(margin + giochiColWidth, y, fornitoreColWidth, rowHeight);
         
         doc.setFont('helvetica', 'bold');
-        doc.text('Giochi Pubblici', margin, y);
-        doc.text('Fornitore del Servizio', margin + 110, y);
-        y += 6;
+        doc.text('Giochi Pubblici', margin + 2, y + 5.5);
+        doc.text('Fornitore del Servizio', margin + giochiColWidth + 2, y + 5.5);
+        y += rowHeight;
         
+        // Righe giochi
         doc.setFont('helvetica', 'normal');
         const giochi = [
           'Scommesse ippiche a totalizzatore e a Quota Fissa (IP)',
@@ -212,10 +237,14 @@ export default function ADMReportGenerator() {
           'V7',
           'Ippica Nazionale (IN)'
         ];
+        
         giochi.forEach(g => {
-          doc.text(g, margin, y);
-          doc.text(frontespizio.fornitoreServizio, margin + 110, y);
-          y += 5;
+          doc.rect(margin, y, giochiColWidth, rowHeight);
+          doc.rect(margin + giochiColWidth, y, fornitoreColWidth, rowHeight);
+          doc.setFontSize(9);
+          doc.text(g, margin + 2, y + 5.5);
+          doc.text(frontespizio.fornitoreServizio, margin + giochiColWidth + 2, y + 5.5);
+          y += rowHeight;
         });
 
         // ========================================
@@ -338,13 +367,18 @@ export default function ADMReportGenerator() {
             doc.text('Per ogni giorno si considera Fascia Oraria l\'intervallo di tempo del funzionamento del Totalizzatore Nazionale ovvero dalle ore 07:00 alle ore 23:00', 10, y);
             y += 6;
 
-            // TipoGioco checkboxes - TUTTI selezionati con ■
+            // TipoGioco checkboxes - TUTTI selezionati con X
             doc.setFontSize(8);
             doc.text('TipoGioco:', 10, y);
             let xCheck = 35;
             TIPI_GIOCO.forEach(tipo => {
-              doc.text(`${tipo}`, xCheck, y);
-              doc.text('■', xCheck + 12, y);
+              // Disegna box
+              doc.rect(xCheck, y - 3, 4, 4);
+              doc.text(tipo, xCheck + 6, y);
+              // Metti X dentro il box (tutti selezionati)
+              doc.setFont('helvetica', 'bold');
+              doc.text('X', xCheck + 0.8, y - 0.2);
+              doc.setFont('helvetica', 'normal');
               xCheck += 25;
             });
             y += 8;
@@ -400,8 +434,7 @@ export default function ADMReportGenerator() {
               y += 4;
             }
 
-            // Riga Totale
-            doc.setFillColor(255, 255, 200);
+            // Riga Totale - FIX: disegna correttamente per ogni mese
             mesiTrimestre.forEach((nomeMese, idx) => {
               const xBase = startX + (idx * colWidth);
               const meseData = tipoData[nomeMese] || [];
@@ -409,15 +442,20 @@ export default function ADMReportGenerator() {
                 ? meseData.reduce((sum, d) => sum + d.disponibilita, 0) / meseData.length 
                 : 0;
               
-              doc.rect(xBase, y, 25, 5, 'F');
-              doc.rect(xBase + 25, y, colWidth - 30, 5, 'F');
-              doc.rect(xBase, y, 25, 5);
-              doc.rect(xBase + 25, y, colWidth - 30, 5);
+              // Sfondo giallo
+              doc.setFillColor(255, 255, 200);
+              doc.rect(xBase, y, 25, 5, 'FD');
+              doc.rect(xBase + 25, y, colWidth - 30, 5, 'FD');
               
+              // Testo
               doc.setFont('helvetica', 'bold');
+              doc.setFontSize(7);
               doc.text('Totale', xBase + 5, y + 3.5);
-              doc.text(media.toFixed(2).replace('.', ','), xBase + 50, y + 3.5);
+              if (meseData.length > 0) {
+                doc.text(media.toFixed(2).replace('.', ','), xBase + 50, y + 3.5);
+              }
             });
+            doc.setFont('helvetica', 'normal');
           });
         });
 
@@ -445,9 +483,14 @@ export default function ADMReportGenerator() {
             doc.text('TipoGioco:', 10, y);
             let xCheck = 30;
             TIPI_GIOCO.forEach(tipo => {
-              doc.text(tipo, xCheck, y);
+              // Disegna box
+              doc.rect(xCheck, y - 3, 4, 4);
+              doc.text(tipo, xCheck + 6, y);
+              // Solo "Tutti" ha la X
               if (tipo === 'Tutti') {
-                doc.text('■', xCheck + 10, y);
+                doc.setFont('helvetica', 'bold');
+                doc.text('X', xCheck + 0.8, y - 0.2);
+                doc.setFont('helvetica', 'normal');
               }
               xCheck += 18;
             });
@@ -611,6 +654,30 @@ export default function ADMReportGenerator() {
 
   const canGenerate = parsedData.prestazioni && parsedData.disponibilita;
 
+  const handleReset = useCallback(() => {
+    setFiles({
+      prestazioni: null,
+      disponibilita: null,
+      ripristino: null
+    });
+    setParsedData({
+      prestazioni: null,
+      disponibilita: null,
+      ripristino: null
+    });
+    setFrontespizio({
+      anno: '2025',
+      dataConsegna: '28/01/2026',
+      concessionario: 'Scommettendo srl',
+      codiceConcessione: '15125',
+      tipologia: 'IPPICA E SPORT',
+      titolareSistema: 'Exalogic SRL',
+      localizzazioneCED: 'ROZZANO',
+      fornitoreServizio: 'SCOMMETTENDO SRL FSC 88'
+    });
+    setStatus('🔄 Tutti i dati sono stati resettati');
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-4 md:p-6">
       <div className="max-w-3xl mx-auto">
@@ -738,6 +805,14 @@ export default function ADMReportGenerator() {
             )}
           </button>
 
+          {/* Bottone Reset */}
+          <button
+            onClick={handleReset}
+            className="w-full mt-3 py-3 rounded-xl font-semibold text-sm transition-all transform bg-gray-700 text-gray-300 hover:bg-red-600 hover:text-white hover:scale-[1.01] active:scale-[0.99] border border-gray-600 hover:border-red-500"
+          >
+            🔄 RESET - Pulisci Tutti i Dati
+          </button>
+
           <div className="mt-4 flex flex-wrap gap-2 justify-center">
             {files.prestazioni && (
               <span className="inline-flex items-center gap-1 bg-gray-700 px-3 py-1 rounded-full text-xs">
@@ -758,7 +833,7 @@ export default function ADMReportGenerator() {
         </div>
 
         <div className="mt-8 text-center text-gray-500 text-xs">
-          <p>Report ADM Generator v1.3</p>
+          <p>Report ADM Generator v1.5</p>
           <p className="mt-1">Rilevazioni sul Gioco Fisico ai fini del controllo dei Livelli di Servizio</p>
         </div>
       </div>
