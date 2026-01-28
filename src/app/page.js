@@ -367,7 +367,7 @@ export default function ADMReportGenerator() {
             doc.text('Per ogni giorno si considera Fascia Oraria l\'intervallo di tempo del funzionamento del Totalizzatore Nazionale ovvero dalle ore 07:00 alle ore 23:00', 10, y);
             y += 6;
 
-            // TipoGioco checkboxes - TUTTI selezionati con X
+            // TipoGioco checkboxes - X solo sul tipo gioco corrente
             doc.setFontSize(8);
             doc.text('TipoGioco:', 10, y);
             let xCheck = 35;
@@ -375,10 +375,12 @@ export default function ADMReportGenerator() {
               // Disegna box
               doc.rect(xCheck, y - 3, 4, 4);
               doc.text(tipo, xCheck + 6, y);
-              // Metti X dentro il box (tutti selezionati)
-              doc.setFont('helvetica', 'bold');
-              doc.text('X', xCheck + 0.8, y - 0.2);
-              doc.setFont('helvetica', 'normal');
+              // Metti X SOLO per il tipo gioco corrente della pagina
+              if (tipo === tipoGioco) {
+                doc.setFont('helvetica', 'bold');
+                doc.text('X', xCheck + 0.8, y - 0.2);
+                doc.setFont('helvetica', 'normal');
+              }
               xCheck += 25;
             });
             y += 8;
@@ -833,7 +835,7 @@ export default function ADMReportGenerator() {
         </div>
 
         <div className="mt-8 text-center text-gray-500 text-xs">
-          <p>Report ADM Generator v1.5</p>
+          <p>Report ADM Generator v1.6</p>
           <p className="mt-1">Rilevazioni sul Gioco Fisico ai fini del controllo dei Livelli di Servizio</p>
         </div>
       </div>
